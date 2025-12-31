@@ -34,7 +34,10 @@
     const answerContainerEl = generateElements(
       `<div class="answer-container"></div>`
     );
-    puterEl.append(tldrContainerEl, answerContainerEl);
+    const factCheckContainerEl = generateElements(
+      `<div class="factcheck-container"></div>`
+    );
+    puterEl.append(tldrContainerEl, answerContainerEl, factCheckContainerEl);
 
     // Extract images from the post
     const extractPostImages = async () => {
@@ -94,7 +97,10 @@
     const answerBtnEl = generateElements(
       '<button class="ai-button answer-button">Answer</button>'
     );
-    aiToolbarEl.append(tldrBtnEl, answerBtnEl);
+    const factCheckBtnEl = generateElements(
+      '<button class="ai-button factcheck-button">Fact Check</button>'
+    );
+    aiToolbarEl.append(tldrBtnEl, answerBtnEl, factCheckBtnEl);
     puterEl.appendChild(aiToolbarEl);
 
     const runAction = async (containerEl, buttonEl, promptBuilder) => {
@@ -158,6 +164,20 @@ If questions are asked, answer them concisely.
 If no questions, offer a concise solution or advice for the situation.
 Even if the post content is empty, use the title and subreddit context to inform your response.
 If images are included, analyze them and incorporate their content into your response.
+Subreddit: ${subredditName}
+Post Title: ${postTitle}
+Post Content:
+${content}
+`
+        )
+      );
+    factCheckBtnEl.onclick = () =>
+      runAction(factCheckContainerEl, factCheckBtnEl, () =>
+        buildPrompt(
+          content => `
+Read the Reddit post below. Also take note of the subreddit name.
+Fact check the claims made in the post. Provide evidence-based verification or refutation.
+If images are included, analyze them and incorporate their content into your fact check.
 Subreddit: ${subredditName}
 Post Title: ${postTitle}
 Post Content:
