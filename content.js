@@ -47,7 +47,7 @@
       const imageUrls = [];
 
       // Look for post images in various Reddit elements
-      const imgElements = postEl.querySelectorAll('img[src]');
+      const imgElements = postEl.querySelectorAll('img.non-lightboxed-content');
       imgElements.forEach(img => {
         const src = img.src;
         // Filter out icons, thumbnails, and very small images
