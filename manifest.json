@@ -22,6 +22,7 @@
       "js": [
         "fetch-shim.js",
         "puter.js",
+        "helpers.js",
         "content.js"
       ]
     }
