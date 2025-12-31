@@ -1,15 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "Reddit Puter Proxy",
+  "name": "Gemma AI Explorer",
   "version": "2.0",
   "permissions": [
     "activeTab",
-    "scripting"
+    "scripting",
+    "storage"
   ],
   "host_permissions": [
     "https://*.reddit.com/*",
-    "https://*.puter.com/*",
-    "https://puter.com/*"
+    "https://generativelanguage.googleapis.com/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -20,8 +20,6 @@
         "https://*.reddit.com/*"
       ],
       "js": [
-        "fetch-shim.js",
-        "puter.js",
         "helpers.js",
         "content.js"
       ]

@@ -1,14 +1,53 @@
-async function puterWithStopwatch(prompt, model = 'gemini-3-pro-preview') {
-  let duration;
+async function askWithStopwatch(prompt, model = 'gemma-3-27b-it') {
+  let duration, puterResText;
   const startTime = performance.now();
-  const puterRes = await puter.ai.chat(prompt, {
-    model: model,
-  });
-  console.log(puterRes);
-  const puterResText = puterRes.message.content;
-  const endTime = performance.now();
-  duration = endTime - startTime;
+  const apiKey = await getSecret('apiKey');
+
+  try {
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+      }),
+    });
+
+    const endTime = performance.now();
+    duration = endTime - startTime;
+
+    const result = await response.json();
+
+    if (result.candidates && result.candidates[0].content.parts[0].text) {
+      puterResText = result.candidates[0].content.parts[0].text;
+    } else {
+      throw new Error(result.error?.message || 'Unknown error');
+    }
+  } catch (error) {
+    puterResText = 'Error: ' + error.message;
+  }
+
   return { puterResText, duration };
+}
+
+async function getSecret(valueKey = 'apiKey') {
+  // 1. Try to get the value from chrome local storage
+  const result = await chrome.storage.local.get([valueKey]);
+  let secretValue = result[valueKey];
+
+  if (secretValue) return secretValue;
+
+  // 2. If not found, prompt the user
+  secretValue = prompt(`Please enter your ${valueKey} value:`);
+
+  // 3. If the user provided a value, save it and return it
+  if (secretValue) {
+    await chrome.storage.local.set({ [valueKey]: secretValue });
+    return secretValue;
+  }
+
+  return null;
 }
 
 const CentralObserverManager = (function () {
