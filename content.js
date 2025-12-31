@@ -36,6 +36,55 @@
     );
     puterEl.append(tldrContainerEl, answerContainerEl);
 
+    // Extract images from the post
+    const extractPostImages = async () => {
+      const imageUrls = [];
+
+      // Look for post images in various Reddit elements
+      const imgElements = postEl.querySelectorAll('img[src]');
+      imgElements.forEach(img => {
+        const src = img.src;
+        // Filter out icons, thumbnails, and very small images
+        if (
+          src &&
+          !src.includes('icon') &&
+          !src.includes('avatar') &&
+          img.naturalWidth > 200 &&
+          img.naturalHeight > 200
+        ) {
+          imageUrls.push(src);
+        }
+      });
+
+      // Also check for gallery images and video thumbnails
+      const galleryImages = postEl.querySelectorAll(
+        'a[href*="preview.redd.it"], a[href*="i.redd.it"]'
+      );
+      galleryImages.forEach(link => {
+        const href = link.href;
+        if (
+          href &&
+          (href.includes('.jpg') ||
+            href.includes('.png') ||
+            href.includes('.jpeg'))
+        ) {
+          imageUrls.push(href);
+        }
+      });
+
+      // Remove duplicates
+      const uniqueUrls = [...new Set(imageUrls)];
+
+      // Fetch and convert images to base64 (limit to first 3 to avoid token limits)
+      const imagePromises = uniqueUrls
+        .slice(0, 3)
+        .map(url => fetchImageAsBase64(url));
+      const images = await Promise.all(imagePromises);
+
+      // Filter out failed fetches
+      return images.filter(img => img !== null);
+    };
+
     const aiToolbarEl = generateElements(
       '<div class="ai-toolbar" style="margin-top: 8px;"> ✨</div>'
     );
@@ -55,7 +104,15 @@
       containerEl.textContent = '';
       try {
         const prompt = promptBuilder();
-        const { puterResText, duration } = await askWithStopwatch(prompt);
+
+        // Extract images from the post
+        const postImages = await extractPostImages();
+
+        const { puterResText, duration } = await askWithStopwatch(
+          prompt,
+          undefined,
+          postImages
+        );
         renderResult(containerEl, puterResText, duration);
       } catch (err) {
         console.error(err);
@@ -81,6 +138,9 @@
           content => `
 You are a helpful assistant tasked with summarizing social media content.
 Provide a concise TL;DR for the Reddit post below.
+Extract key points, highlight the most important points from the post.
+Flag potentially biased content in post.
+If images are included, describe them and incorporate their content into the summary.
 Subreddit: ${subredditName}
 Post Title: ${postTitle}
 Post Content:
@@ -96,6 +156,8 @@ ${content}
 Read the Reddit post below. Also take note of the subreddit name.
 If questions are asked, answer them concisely.
 If no questions, offer a concise solution or advice for the situation.
+Even if the post content is empty, use the title and subreddit context to inform your response.
+If images are included, analyze them and incorporate their content into your response.
 Subreddit: ${subredditName}
 Post Title: ${postTitle}
 Post Content:

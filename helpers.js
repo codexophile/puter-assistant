@@ -1,16 +1,32 @@
-async function askWithStopwatch(prompt, model = 'gemma-3-27b-it') {
+async function askWithStopwatch(prompt, model = 'gemma-3-27b-it', images = []) {
   let duration, puterResText;
   const startTime = performance.now();
   const apiKey = await getSecret('apiKey');
 
   try {
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    // Use vision model if images are provided
+    // const selectedModel = images.length > 0 ? 'gemini-1.5-flash' : model;
+    const selectedModel = model;
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
+
+    // Build parts array with text and images
+    const parts = [{ text: prompt }];
+
+    // Add images if provided
+    for (const imageData of images) {
+      parts.push({
+        inline_data: {
+          mime_type: imageData.mimeType,
+          data: imageData.base64,
+        },
+      });
+    }
 
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
+        contents: [{ parts }],
       }),
     });
 
@@ -48,6 +64,47 @@ async function getSecret(valueKey = 'apiKey') {
   }
 
   return null;
+}
+
+// Fetch image from URL and convert to base64
+async function fetchImageAsBase64(imageUrl) {
+  try {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result.split(',')[1];
+        resolve({
+          base64,
+          mimeType: blob.type || 'image/jpeg',
+        });
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.error('Failed to fetch image:', imageUrl, error);
+    return null;
+  }
+}
+
+// Convert image file to base64
+async function imageToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      // Extract base64 data (remove data:image/jpeg;base64, prefix)
+      const base64 = reader.result.split(',')[1];
+      resolve({
+        base64,
+        mimeType: file.type,
+      });
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 const CentralObserverManager = (function () {
