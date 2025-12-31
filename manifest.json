@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Reddit Puter AI",
+  "version": "1.0",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://*.reddit.com/*",
+    "https://*.puter.com/*", 
+    "https://puter.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.reddit.com/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
