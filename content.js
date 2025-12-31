@@ -1,80 +1,113 @@
 // content.js
 
 (async function () {
+  const MAX_CONTENT_CHARS = 4000;
+
+  const truncate = (text, max) => {
+    if (text.length <= max) return text;
+    return `${text.slice(0, max)}\n\n[Content truncated at ${max} chars]`;
+  };
+
+  const sanitize = html => {
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = html;
+    wrapper.querySelectorAll('script, style').forEach(el => el.remove());
+    return wrapper.innerHTML;
+  };
+
+  const renderResult = (containerEl, markdown, duration) => {
+    const parsed = marked.parse(markdown);
+    containerEl.innerHTML = `${sanitize(
+      parsed
+    )}\n        <em>(Generated in ${Math.round(duration)} ms)</em>`;
+  };
+
   // Initialize observer for self-text elements
   waitForEach('.shreddit-post-selftext.userscript-code', async selfTextEl => {
-    const puterEl = generateElements(`<div class=puter-content></div>`);
+    if (selfTextEl.dataset.puterAttached) return;
+    selfTextEl.dataset.puterAttached = '1';
+
+    const postTitleEl =
+      selfTextEl.parentElement.querySelector('[id*="post-title"]');
+    const postLink = postTitleEl?.href;
+    const postTitle = postTitleEl?.textContent?.trim();
+    const subredditName = postLink?.match(/\/r\/([^\/]+)/)?.[1];
+    if (!postTitle || !subredditName) return;
+
+    const puterEl = generateElements(`<div class="puter-content"></div>`);
     selfTextEl.parentElement.after(puterEl);
+
     const tldrContainerEl = generateElements(
-      `<div class="tldr-container" ></div>`
+      `<div class="tldr-container"></div>`
     );
     const answerContainerEl = generateElements(
-      `<div class="answer-container" ></div>`
+      `<div class="answer-container"></div>`
     );
     puterEl.append(tldrContainerEl, answerContainerEl);
 
-    const aiToolbarEl = generateElements(`
-      <div class="ai-toolbar" style="margin-top: 8px;"> ✨
-      </div>
-    `);
-    const tldrBtnEl = generateElements(`
-        <button class="ai-button tldr-button">TL;DR</button>
-      `);
+    const aiToolbarEl = generateElements(
+      '<div class="ai-toolbar" style="margin-top: 8px;"> ✨</div>'
+    );
+    const tldrBtnEl = generateElements(
+      '<button class="ai-button tldr-button">TL;DR</button>'
+    );
     const answerBtnEl = generateElements(
-      `<button class="ai-button answer-button">Answer</button>`
+      '<button class="ai-button answer-button">Answer</button>'
     );
     aiToolbarEl.append(tldrBtnEl, answerBtnEl);
     puterEl.appendChild(aiToolbarEl);
 
-    const postTitle =
-      selfTextEl.parentElement.querySelector('[id*="post-title"]').textContent;
-    const selfTextPlain = selfTextEl.textContent;
-    const subredditName = selfTextEl.parentElement
-      .querySelector(`[id*="post-title"]`)
-      .href.match(/\/r\/([^\/]+)/)[1];
+    const selfTextPlain = truncate(
+      selfTextEl.textContent || '',
+      MAX_CONTENT_CHARS
+    );
 
-    tldrBtnEl.onclick = async () => {
-      const prompt = `
+    const runAction = async (containerEl, buttonEl, promptBuilder) => {
+      buttonEl.disabled = true;
+      const restoreText = buttonEl.textContent;
+      buttonEl.textContent = 'Working…';
+      containerEl.textContent = '';
+      try {
+        const prompt = promptBuilder();
+        const { puterResText, duration } = await askWithStopwatch(prompt);
+        renderResult(containerEl, puterResText, duration);
+      } catch (err) {
+        console.error(err);
+        containerEl.textContent =
+          'Sorry, something went wrong. Please try again.';
+      } finally {
+        buttonEl.disabled = false;
+        buttonEl.textContent = restoreText;
+      }
+    };
+
+    tldrBtnEl.onclick = () =>
+      runAction(
+        tldrContainerEl,
+        tldrBtnEl,
+        () => `
 You are a helpful assistant tasked with summarizing social media content.
-Please provide a concise TL;DR for the Reddit post provided below.
+Provide a concise TL;DR for the Reddit post below.
 Subreddit: ${subredditName}
 Post Title: ${postTitle}
 Post Content:
 ${selfTextPlain}
-`;
+`
+      );
 
-      try {
-        const { puterResText, duration } = await askWithStopwatch(prompt);
-        const htmlFromMarkdown = marked.parse(puterResText);
-        tldrContainerEl.innerHTML = `
-        ${htmlFromMarkdown}
-        <em>(Generated in ${Math.round(duration)} ms)</em>
-      `;
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    answerBtnEl.onclick = async () => {
-      const prompt = `
-Please read the Reddit post provided below. If the original poster has asked any questions in the post content,
-please provide clear and concise answers to those questions. If there are no questions asked,
-but you are able to provide a solution to the situation described, please do so.
-Remember concision is important.
+    answerBtnEl.onclick = () =>
+      runAction(
+        answerContainerEl,
+        answerBtnEl,
+        () => `
+Read the Reddit post below. Also take note of the subreddit name.
+If questions are asked, answer them concisely.
+If no questions, offer a concise solution or advice for the situation.
 Subreddit: ${subredditName}
 Post Title: ${postTitle}
 Post Content:
 ${selfTextPlain}
-`;
-      try {
-        const { puterResText, duration } = await askWithStopwatch(prompt);
-        const htmlFromMarkdown = marked.parse(puterResText);
-        answerContainerEl.innerHTML = `
-        ${htmlFromMarkdown}
-        <em>(Generated in ${Math.round(duration)} ms)</em>
-      `;
-      } catch (err) {
-        console.error(err);
-      }
-    };
+`
+      );
   });
 })();
