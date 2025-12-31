@@ -57,10 +57,7 @@
     aiToolbarEl.append(tldrBtnEl, answerBtnEl);
     puterEl.appendChild(aiToolbarEl);
 
-    const selfTextPlain = truncate(
-      selfTextEl.textContent || '',
-      MAX_CONTENT_CHARS
-    );
+    const selfTextPlain = selfTextEl.textContent || '';
 
     const runAction = async (containerEl, buttonEl, promptBuilder) => {
       buttonEl.disabled = true;
