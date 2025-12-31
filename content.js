@@ -22,6 +22,9 @@
     const postTitleEl = postEl.querySelector('[id*="post-title"]');
     const postLink = postTitleEl?.href || location.href;
     const postTitle = postTitleEl?.textContent?.trim();
+    const attachedLink = postEl.querySelector(
+      '.post-link, [slot="post-media-container"] a'
+    );
     const subredditName = postLink?.match(/\/r\/([^\/]+)/)?.[1];
     if (!postTitle || !subredditName) return;
 
@@ -150,6 +153,7 @@ If images are included, describe them and incorporate their content into the sum
 Subreddit: ${subredditName}
 Post Title: ${postTitle}
 Post Content:
+${attachedLink}
 ${content}
 `
         )
@@ -167,6 +171,7 @@ If images are included, analyze them and incorporate their content into your res
 Subreddit: ${subredditName}
 Post Title: ${postTitle}
 Post Content:
+${attachedLink}
 ${content}
 `
         )
@@ -181,6 +186,7 @@ If images are included, analyze them and incorporate their content into your fac
 Subreddit: ${subredditName}
 Post Title: ${postTitle}
 Post Content:
+${attachedLink}
 ${content}
 `
         )
