@@ -1,22 +1,30 @@
-// Import the local library (allowed in MV3 service workers)
-importScripts('puter.js');
+// background.js
 
-// Listen for messages from the content script (Reddit page)
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'get_tldr') {
-    // Perform the AI request here.
-    // Since we are in the background, Reddit's CSP does not exist here.
-    puter.ai
-      .chat(request.text)
-      .then(response => {
-        sendResponse({ success: true, data: response });
+  if (request.action === 'PROXY_FETCH') {
+    // Perform the actual fetch from the privileged background context
+    fetch(request.url, request.init)
+      .then(async response => {
+        // We must serialize the response body to send it back
+        const blob = await response.blob();
+
+        // Convert blob to base64 string to pass via message
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          sendResponse({
+            success: true,
+            status: response.status,
+            statusText: response.statusText,
+            headers: Array.from(response.headers.entries()),
+            data: reader.result, // This is the base64 string
+          });
+        };
+        reader.readAsDataURL(blob);
       })
       .catch(error => {
-        console.error(error);
         sendResponse({ success: false, error: error.toString() });
       });
 
-    // Return true to indicate we will send a response asynchronously
-    return true;
+    return true; // Indicates async response
   }
 });
