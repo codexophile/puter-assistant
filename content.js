@@ -148,7 +148,8 @@
 You are a helpful assistant tasked with summarizing social media content.
 Provide a concise TL;DR for the Reddit post below.
 Extract key points, highlight the most important points from the post.
-Flag potentially biased content in post.
+Do the key point extraction only if the post contains sufficient detail.
+Flag potentially biased content in post, only when appropriate.
 If images are included, describe them and incorporate their content into the summary.
 Subreddit: ${subredditName}
 Post Title: ${postTitle}
