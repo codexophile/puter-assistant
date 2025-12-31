@@ -20,7 +20,7 @@
     postEl.dataset.puterAttached = '1';
 
     const postTitleEl = postEl.querySelector('[id*="post-title"]');
-    const postLink = postTitleEl?.href;
+    const postLink = postTitleEl?.href || location.href;
     const postTitle = postTitleEl?.textContent?.trim();
     const subredditName = postLink?.match(/\/r\/([^\/]+)/)?.[1];
     if (!postTitle || !subredditName) return;
@@ -69,7 +69,7 @@
 
     const buildPrompt = template => {
       const selfTextEl = postEl.querySelector(
-        '.shreddit-post-selftext.userscript-code'
+        '.shreddit-post-selftext.userscript-code, shreddit-post-text-body'
       );
       const selfTextPlain = selfTextEl?.textContent || '';
       return template(selfTextPlain);
