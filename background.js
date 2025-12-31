@@ -3,11 +3,11 @@ importScripts('puter.js');
 
 // Listen for messages from the content script (Reddit page)
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === "ANALYZE_TEXT") {
-    
-    // Perform the AI request here. 
+  if (request.action === 'get_tldr') {
+    // Perform the AI request here.
     // Since we are in the background, Reddit's CSP does not exist here.
-    puter.ai.chat(request.text)
+    puter.ai
+      .chat(request.text)
       .then(response => {
         sendResponse({ success: true, data: response });
       })
@@ -17,6 +17,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
 
     // Return true to indicate we will send a response asynchronously
-    return true; 
+    return true;
   }
 });
