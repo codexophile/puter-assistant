@@ -1,10 +1,13 @@
 async function puterWithStopwatch(prompt, model = 'gemini-3-pro-preview') {
   let duration;
+  const startTime = performance.now();
   const puterRes = await puter.ai.chat(prompt, {
     model: model,
   });
-  const puterResText = puterRes.content;
-  duration = performance.now() - performance.now();
+  console.log(puterRes);
+  const puterResText = puterRes.message.content;
+  const endTime = performance.now();
+  duration = endTime - startTime;
   return { puterResText, duration };
 }
 
