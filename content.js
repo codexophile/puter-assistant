@@ -1,8 +1,6 @@
 // content.js
 
 (async function () {
-  const apiKey = await getSecret('apiKey');
-
   // Initialize observer for self-text elements
   waitForEach('.shreddit-post-selftext.userscript-code', async selfTextEl => {
     const puterEl = generateElements(`<div class=puter-content></div>`);
@@ -24,9 +22,9 @@ ${selfTextPlain}
     if (charCount >= 700) {
       try {
         const { puterResText, duration } = await askWithStopwatch(prompt);
+        const htmlFromMarkdown = marked.parse(puterResText);
         puterEl.innerHTML = `
-        <strong>Puter TL;DR:</strong>
-        <p>${puterResText}</p>
+        ${htmlFromMarkdown}
         <em>(Generated in ${Math.round(duration)} ms)</em>
       `;
       } catch (err) {
