@@ -20,6 +20,7 @@
         "https://*.reddit.com/*"
       ],
       "js": [
+        "fetch-shim.js",
         "puter.js",
         "content.js"
       ]
