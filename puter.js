@@ -8059,7 +8059,7 @@
     }
   }
   ts.__proto__ === globalThis.HTMLElement &&
-    customElements.define('puter-dialog', ts);
+    customElements?.define('puter-dialog', ts);
   const ss = ts,
     rs = () => {
       let e, t;
