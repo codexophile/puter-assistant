@@ -1,13 +1,6 @@
 // content.js
 
 (async function () {
-  const MAX_CONTENT_CHARS = 4000;
-
-  const truncate = (text, max) => {
-    if (text.length <= max) return text;
-    return `${text.slice(0, max)}\n\n[Content truncated at ${max} chars]`;
-  };
-
   const sanitize = html => {
     const wrapper = document.createElement('div');
     wrapper.innerHTML = html;
