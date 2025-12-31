@@ -15,20 +15,18 @@
     )}\n        <em>(Generated in ${Math.round(duration)} ms)</em>`;
   };
 
-  // Initialize observer for self-text elements
-  waitForEach('.shreddit-post-selftext.userscript-code', async selfTextEl => {
-    if (selfTextEl.dataset.puterAttached) return;
-    selfTextEl.dataset.puterAttached = '1';
+  waitForEach('shreddit-post', async postEl => {
+    if (postEl.dataset.puterAttached) return;
+    postEl.dataset.puterAttached = '1';
 
-    const postTitleEl =
-      selfTextEl.parentElement.querySelector('[id*="post-title"]');
+    const postTitleEl = postEl.querySelector('[id*="post-title"]');
     const postLink = postTitleEl?.href;
     const postTitle = postTitleEl?.textContent?.trim();
     const subredditName = postLink?.match(/\/r\/([^\/]+)/)?.[1];
     if (!postTitle || !subredditName) return;
 
     const puterEl = generateElements(`<div class="puter-content"></div>`);
-    selfTextEl.parentElement.after(puterEl);
+    postEl.append(puterEl);
 
     const tldrContainerEl = generateElements(
       `<div class="tldr-container"></div>`
@@ -50,8 +48,6 @@
     aiToolbarEl.append(tldrBtnEl, answerBtnEl);
     puterEl.appendChild(aiToolbarEl);
 
-    const selfTextPlain = selfTextEl.textContent || '';
-
     const runAction = async (containerEl, buttonEl, promptBuilder) => {
       buttonEl.disabled = true;
       const restoreText = buttonEl.textContent;
@@ -71,33 +67,41 @@
       }
     };
 
+    const buildPrompt = template => {
+      const selfTextEl = postEl.querySelector(
+        '.shreddit-post-selftext.userscript-code'
+      );
+      const selfTextPlain = selfTextEl?.textContent || '';
+      return template(selfTextPlain);
+    };
+
     tldrBtnEl.onclick = () =>
-      runAction(
-        tldrContainerEl,
-        tldrBtnEl,
-        () => `
+      runAction(tldrContainerEl, tldrBtnEl, () =>
+        buildPrompt(
+          content => `
 You are a helpful assistant tasked with summarizing social media content.
 Provide a concise TL;DR for the Reddit post below.
 Subreddit: ${subredditName}
 Post Title: ${postTitle}
 Post Content:
-${selfTextPlain}
+${content}
 `
+        )
       );
 
     answerBtnEl.onclick = () =>
-      runAction(
-        answerContainerEl,
-        answerBtnEl,
-        () => `
+      runAction(answerContainerEl, answerBtnEl, () =>
+        buildPrompt(
+          content => `
 Read the Reddit post below. Also take note of the subreddit name.
 If questions are asked, answer them concisely.
 If no questions, offer a concise solution or advice for the situation.
 Subreddit: ${subredditName}
 Post Title: ${postTitle}
 Post Content:
-${selfTextPlain}
+${content}
 `
+        )
       );
   });
 })();
