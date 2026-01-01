@@ -106,13 +106,19 @@
     aiToolbarEl.append(tldrBtnEl, answerBtnEl, factCheckBtnEl);
     puterEl.appendChild(aiToolbarEl);
 
-    const runAction = async (containerEl, buttonEl, promptBuilder) => {
+    const runAction = async (
+      containerEl,
+      buttonEl,
+      promptBuilder,
+      optionsBuilder = () => ({})
+    ) => {
       buttonEl.disabled = true;
       const restoreText = buttonEl.textContent;
       buttonEl.textContent = 'Working…';
       containerEl.textContent = '';
       try {
         const prompt = promptBuilder();
+        const options = optionsBuilder();
 
         // Extract images from the post
         const postImages = await extractPostImages();
@@ -120,7 +126,8 @@
         const { puterResText, duration } = await askWithStopwatch(
           prompt,
           undefined,
-          postImages
+          postImages,
+          options
         );
         renderResult(containerEl, puterResText, duration);
       } catch (err) {
@@ -133,12 +140,22 @@
       }
     };
 
-    const buildPrompt = template => {
+    const getSelfText = () => {
       const selfTextEl = postEl.querySelector(
         '.shreddit-post-selftext.userscript-code, shreddit-post-text-body'
       );
-      const selfTextPlain = selfTextEl?.textContent || '';
+      return selfTextEl?.textContent || '';
+    };
+
+    const buildPrompt = template => {
+      const selfTextPlain = getSelfText();
       return template(selfTextPlain);
+    };
+
+    const buildSearchQuery = bodyText => {
+      const compactBody = (bodyText || '').replace(/\s+/g, ' ').trim();
+      const joined = `${postTitle} ${compactBody}`.trim();
+      return joined.slice(0, 240);
     };
 
     tldrBtnEl.onclick = () =>
@@ -165,9 +182,12 @@ ${content}
       );
 
     answerBtnEl.onclick = () =>
-      runAction(answerContainerEl, answerBtnEl, () =>
-        buildPrompt(
-          content => `
+      runAction(
+        answerContainerEl,
+        answerBtnEl,
+        () =>
+          buildPrompt(
+            content => `
 Read the Reddit post below. Also take note of the subreddit name.
 If questions are asked, answer them concisely.
 If no questions, offer a concise solution or advice for the situation.
@@ -179,12 +199,21 @@ Post Content:
 ${attachedLink}
 ${content}
 `
-        )
+          ),
+        () => ({
+          useWeb: true,
+          mode: 'answer',
+          searchQuery: buildSearchQuery(getSelfText()),
+          searchLimit: 6,
+        })
       );
     factCheckBtnEl.onclick = () =>
-      runAction(factCheckContainerEl, factCheckBtnEl, () =>
-        buildPrompt(
-          content => `
+      runAction(
+        factCheckContainerEl,
+        factCheckBtnEl,
+        () =>
+          buildPrompt(
+            content => `
 Read the Reddit post below. Also take note of the subreddit name.
 Fact check the claims made in the post. Provide evidence-based verification or refutation.
 If images are included, analyze them and incorporate their content into your fact check.
@@ -194,7 +223,13 @@ Post Content:
 ${attachedLink}
 ${content}
 `
-        )
+          ),
+        () => ({
+          useWeb: true,
+          mode: 'fact-check',
+          searchQuery: buildSearchQuery(getSelfText()),
+          searchLimit: 6,
+        })
       );
   });
 })();

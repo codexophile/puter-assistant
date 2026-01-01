@@ -1,18 +1,44 @@
-async function askWithStopwatch(prompt, model = 'gemma-3-27b-it', images = []) {
-  let duration, puterResText;
+async function askWithStopwatch(
+  prompt,
+  model = 'gemma-3-27b-it',
+  images = [],
+  options = {}
+) {
+  const {
+    useWeb = false,
+    mode = 'answer',
+    searchQuery,
+    searchLimit = 5,
+    searchProvider = 'duckduckgo',
+    webSnippets,
+    timeoutMs = 12000,
+  } = options;
+
+  let duration;
+  let puterResText;
   const startTime = performance.now();
   const apiKey = await getSecret('apiKey');
 
   try {
-    // Use vision model if images are provided
-    // const selectedModel = images.length > 0 ? 'gemini-1.5-flash' : model;
+    const snippets = webSnippets?.length
+      ? webSnippets
+      : useWeb
+      ? await searchWeb(searchQuery || prompt, {
+          limit: searchLimit,
+          provider: searchProvider,
+          timeoutMs,
+        })
+      : [];
+
+    const finalPrompt = snippets.length
+      ? buildWebAugmentedPrompt({ userPrompt: prompt, snippets, mode })
+      : prompt;
+
     const selectedModel = model;
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
 
-    // Build parts array with text and images
-    const parts = [{ text: prompt }];
+    const parts = [{ text: finalPrompt }];
 
-    // Add images if provided
     for (const imageData of images) {
       parts.push({
         inline_data: {
@@ -34,17 +60,63 @@ async function askWithStopwatch(prompt, model = 'gemma-3-27b-it', images = []) {
     duration = endTime - startTime;
 
     const result = await response.json();
+    const candidateText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-    if (result.candidates && result.candidates[0].content.parts[0].text) {
-      puterResText = result.candidates[0].content.parts[0].text;
+    if (candidateText) {
+      puterResText = candidateText;
     } else {
-      throw new Error(result.error?.message || 'Unknown error');
+      throw new Error(result?.error?.message || 'Unknown error');
     }
   } catch (error) {
     puterResText = 'Error: ' + error.message;
   }
 
   return { puterResText, duration };
+}
+
+async function searchWeb(
+  query,
+  { limit = 5, provider = 'duckduckgo', timeoutMs = 8000 } = {}
+) {
+  if (!query) return [];
+
+  try {
+    // Send message to background script to perform search (avoids CORS)
+    const response = await chrome.runtime.sendMessage({
+      action: 'searchWeb',
+      query,
+      options: { limit, provider, timeoutMs },
+    });
+
+    if (response?.success) {
+      return response.results || [];
+    } else {
+      console.error('Search failed:', response?.error);
+      return [];
+    }
+  } catch (error) {
+    console.error('searchWeb failed', error);
+    return [];
+  }
+}
+
+function buildWebAugmentedPrompt({ userPrompt, snippets, mode = 'answer' }) {
+  const taskInstruction =
+    mode === 'fact-check'
+      ? 'You are a fact-checking assistant. Verify claims using only the provided sources.'
+      : 'You are an assistant that must answer using only the provided sources.';
+
+  const sourcesBlock = snippets
+    .map((item, index) => {
+      return [
+        `[${index + 1}] ${item.title}`.trim(),
+        item.url,
+        item.snippet,
+      ].join('\n');
+    })
+    .join('\n\n');
+
+  return `${taskInstruction}\n\nUser prompt:\n${userPrompt}\n\nSources:\n${sourcesBlock}\n\nRules:\n- Cite sources by [number].\n- If sources are insufficient, say so.\n- Do not make up information that is not supported by the sources.`;
 }
 
 async function getSecret(valueKey = 'apiKey') {
