@@ -171,7 +171,9 @@ Analyze if the post is sarcastic. Indicate this using the emoji 🙃 for sarcast
 Detect if original poster is genuinely asking for help or trolling.
 Indicate this (whether they are trolling or not) using the emoji 🤔 for genuine, or 😈 for trolling.
 Detect hidden agendas — Identify if someone's asking one thing but really wants validation for something else
-If images are included, describe them and incorporate their content into the summary.
+If images are included, describe them and incorporate their content into the summary. If not don't say anything about images.
+If the post is a joke in textual form, first try to summarize the joke without ruining the humor,
+then explain the humor briefly.
 Subreddit: ${subredditName}
 Post Title: ${postTitle}
 Post Content:
@@ -193,6 +195,7 @@ If questions are asked, answer them concisely.
 If no questions, offer a concise solution or advice for the situation.
 Even if the post content is empty, use the title and subreddit context to inform your response.
 If images are included, analyze them and incorporate their content into your response.
+Always try to include relevant external links and images to support your answer.
 Subreddit: ${subredditName}
 Post Title: ${postTitle}
 Post Content:
