@@ -164,16 +164,24 @@
           content => `
 You are a helpful assistant tasked with summarizing social media content.
 Provide a concise TL;DR for the Reddit post below.
-Extract key points, highlight the most important points from the post.
+
+1. Extract key points, highlight the most important points from the post.
 Do the key point extraction only if the post contains sufficient detail.
-Flag potentially biased content in post, only when appropriate.
-Analyze if the post is sarcastic. Indicate this using the emoji 🙃 for sarcastic, or 🙂 for sincere.
-Detect if original poster is genuinely asking for help or trolling.
+
+2. Flag potentially biased content in post, only when appropriate.
+
+3. Analyze if the post is sarcastic. Indicate this using the emoji 🙃 for sarcastic, or 🙂 for sincere.
+
+4. Detect if original poster is genuinely asking for help or trolling.
 Indicate this (whether they are trolling or not) using the emoji 🤔 for genuine, or 😈 for trolling.
-Detect hidden agendas — Identify if someone's asking one thing but really wants validation for something else
+
+5. Detect hidden agendas — Identify if someone's asking one thing but really wants validation for something else
+
 If images are included, describe them and incorporate their content into the summary. If not don't say anything about images.
+
 If the post is a joke in textual form, first try to summarize the joke without ruining the humor,
-then explain the humor briefly.
+then explain the humor briefly. In this case ignore points 1, 2, 3, 4, and 5.
+
 Subreddit: ${subredditName}
 Post Title: ${postTitle}
 Post Content:
