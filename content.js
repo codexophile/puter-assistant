@@ -180,7 +180,9 @@ Indicate this (whether they are trolling or not) using the emoji 🤔 for genuin
 If images are included, describe them and incorporate their content into the summary. If not don't say anything about images.
 
 If the post is a joke in textual form, first try to summarize the joke without ruining the humor,
-then explain the humor briefly. In this case ignore points 1, 2, 3, 4, and 5.
+then explain the humor briefly.
+The joke summary should still be entertaining on its own as a mini version of the original joke.
+In this case ignore points 1, 2, 3, 4, and 5.
 
 Subreddit: ${subredditName}
 Post Title: ${postTitle}
