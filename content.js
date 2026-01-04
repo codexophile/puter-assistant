@@ -91,6 +91,32 @@
       return images.filter(img => img !== null);
     };
 
+    // Extract closed captions from the post
+    const extractClosedCaptions = async () => {
+      const player = postEl.querySelector('shreddit-player');
+      if (!player) return null;
+
+      // Access shadowRoot
+      const shadowRoot = player.shadowRoot;
+      if (!shadowRoot) return null;
+
+      const mediaUI = shadowRoot.querySelector('shreddit-media-ui');
+      if (!mediaUI) return null;
+
+      const captionUrl = mediaUI.getAttribute('caption-url');
+      if (!captionUrl) return null;
+
+      try {
+        const response = await fetch(captionUrl);
+        if (!response.ok) return null;
+        const text = await response.text();
+        return text;
+      } catch (e) {
+        console.error('Failed to fetch captions', e);
+        return null;
+      }
+    };
+
     const aiToolbarEl = generateElements(
       '<div class="ai-toolbar" style="margin-top: 8px;"> ✨</div>'
     );
@@ -117,11 +143,17 @@
       buttonEl.textContent = 'Working…';
       containerEl.textContent = '';
       try {
-        const prompt = promptBuilder();
+        let prompt = promptBuilder();
         const options = optionsBuilder();
 
         // Extract images from the post
         const postImages = await extractPostImages();
+
+        // Extract closed captions
+        const closedCaptions = await extractClosedCaptions();
+        if (closedCaptions) {
+          prompt += `\n\nVideo closed captions: ${closedCaptions}`;
+        }
 
         const { puterResText, duration } = await askWithStopwatch(
           prompt,
