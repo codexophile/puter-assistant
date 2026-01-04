@@ -155,6 +155,8 @@
           prompt += `\n\nVideo closed captions: ${closedCaptions}`;
         }
 
+        console.log(prompt);
+
         const { puterResText, duration } = await askWithStopwatch(
           prompt,
           undefined,
