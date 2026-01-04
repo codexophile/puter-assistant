@@ -34,6 +34,8 @@ async function askWithStopwatch(
       ? buildWebAugmentedPrompt({ userPrompt: prompt, snippets, mode })
       : prompt;
 
+    console.log(finalPrompt);
+
     const selectedModel = model;
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
 
