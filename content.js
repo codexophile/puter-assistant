@@ -158,11 +158,18 @@
       return joined.slice(0, 240);
     };
 
+    const withMetadata = instruction => content =>
+      `${instruction}
+Subreddit: ${subredditName}
+Post Title: ${postTitle}
+Post Content:
+${attachedLink}
+${content}`;
+
     tldrBtnEl.onclick = () =>
       runAction(tldrContainerEl, tldrBtnEl, () =>
         buildPrompt(
-          content => `
-You are a helpful assistant tasked with summarizing social media content.
+          withMetadata(`You are a helpful assistant tasked with summarizing social media content.
 Provide a concise TL;DR for the Reddit post below.
 
 1. Extract key points, highlight the most important points from the post.
@@ -182,14 +189,7 @@ If images are included, describe them and incorporate their content into the sum
 If the post is a joke in textual form, first try to summarize the joke without ruining the humor,
 then explain the humor briefly.
 The joke summary should still be read as a joke/story and should be entertaining on its own as a mini version of the original joke.
-In this case ignore points 1, 2, 3, 4, and 5.
-
-Subreddit: ${subredditName}
-Post Title: ${postTitle}
-Post Content:
-${attachedLink}
-${content}
-`
+In this case ignore points 1, 2, 3, 4, and 5.`)
         )
       );
 
@@ -199,19 +199,12 @@ ${content}
         answerBtnEl,
         () =>
           buildPrompt(
-            content => `
-Read the Reddit post below. Also take note of the subreddit name.
+            withMetadata(`Read the Reddit post below. Also take note of the subreddit name.
 If questions are asked, answer them concisely.
 If no questions, offer a concise solution or advice for the situation.
 Even if the post content is empty, use the title and subreddit context to inform your response.
 If images are included, analyze them and incorporate their content into your response.
-Always try to include relevant external links and images to support your answer.
-Subreddit: ${subredditName}
-Post Title: ${postTitle}
-Post Content:
-${attachedLink}
-${content}
-`
+Always try to include relevant external links and images to support your answer.`)
           ),
         () => ({
           useWeb: true,
@@ -226,16 +219,9 @@ ${content}
         factCheckBtnEl,
         () =>
           buildPrompt(
-            content => `
-Read the Reddit post below. Also take note of the subreddit name.
+            withMetadata(`Read the Reddit post below. Also take note of the subreddit name.
 Fact check the claims made in the post. Provide evidence-based verification or refutation.
-If images are included, analyze them and incorporate their content into your fact check.
-Subreddit: ${subredditName}
-Post Title: ${postTitle}
-Post Content:
-${attachedLink}
-${content}
-`
+If images are included, analyze them and incorporate their content into your fact check.`)
           ),
         () => ({
           useWeb: true,
