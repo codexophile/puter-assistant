@@ -24,6 +24,9 @@
       "js": [
         "marked.js",
         "helpers.js",
+        "core/ui-builder.js",
+        "core/ai-actions.js",
+        "sites/reddit.js",
         "content.js"
       ],
       "css": [
