@@ -132,58 +132,11 @@
     aiToolbarEl.append(tldrBtnEl, answerBtnEl, factCheckBtnEl);
     puterEl.appendChild(aiToolbarEl);
 
-    const runAction = async (
-      containerEl,
-      buttonEl,
-      promptBuilder,
-      optionsBuilder = () => ({})
-    ) => {
-      buttonEl.disabled = true;
-      const restoreText = buttonEl.textContent;
-      buttonEl.textContent = 'Working…';
-      containerEl.textContent = '';
-      try {
-        let prompt = promptBuilder();
-        const options = optionsBuilder();
-
-        // Extract images from the post
-        const postImages = await extractPostImages();
-
-        // Extract closed captions
-        const closedCaptions = await extractClosedCaptions();
-        if (closedCaptions) {
-          prompt += `\n\nVideo closed captions: ${closedCaptions}`;
-        }
-
-        console.log(prompt);
-
-        const { puterResText, duration } = await askWithStopwatch(
-          prompt,
-          undefined,
-          postImages,
-          options
-        );
-        renderResult(containerEl, puterResText, duration);
-      } catch (err) {
-        console.error(err);
-        containerEl.textContent =
-          'Sorry, something went wrong. Please try again.';
-      } finally {
-        buttonEl.disabled = false;
-        buttonEl.textContent = restoreText;
-      }
-    };
-
     const getSelfText = () => {
       const selfTextEl = postEl.querySelector(
         '.shreddit-post-selftext.userscript-code, shreddit-post-text-body'
       );
       return selfTextEl?.textContent || '';
-    };
-
-    const buildPrompt = template => {
-      const selfTextPlain = getSelfText();
-      return template(selfTextPlain);
     };
 
     const buildSearchQuery = bodyText => {
@@ -192,18 +145,31 @@
       return joined.slice(0, 240);
     };
 
-    const withMetadata = instruction => content =>
-      `${instruction}
+    const handleAction = async (type, btnEl, containerEl) => {
+      btnEl.disabled = true;
+      const restoreText = btnEl.textContent;
+      btnEl.textContent = 'Working…';
+      containerEl.textContent = '';
+
+      try {
+        const selfText = getSelfText();
+        const postImages = await extractPostImages();
+        const captions = await extractClosedCaptions();
+
+        const context = `
 Subreddit: ${subredditName}
 Post Title: ${postTitle}
 Post Content:
 ${attachedLink}
-${content}`;
+${selfText}
+${captions ? `\n\nVideo closed captions: ${captions}` : ''}
+`.trim();
 
-    tldrBtnEl.onclick = () =>
-      runAction(tldrContainerEl, tldrBtnEl, () =>
-        buildPrompt(
-          withMetadata(`You are a helpful assistant tasked with summarizing social media content.
+        let instruction = '';
+        const options = { useWeb: false, mode: 'answer' };
+
+        if (type === 'tldr') {
+          instruction = `You are a helpful assistant tasked with summarizing social media content.
 Provide a concise TL;DR for the Reddit post below.
 
 1. Extract key points, highlight the most important points from the post.
@@ -223,46 +189,50 @@ If images are included, describe them and incorporate their content into the sum
 If the post is a joke in textual form, first try to summarize the joke without ruining the humor,
 then explain the humor briefly.
 The joke summary should still be read as a joke/story and should be entertaining on its own as a mini version of the original joke.
-In this case ignore points 1, 2, 3, 4, and 5.`)
-        )
-      );
-
-    answerBtnEl.onclick = () =>
-      runAction(
-        answerContainerEl,
-        answerBtnEl,
-        () =>
-          buildPrompt(
-            withMetadata(`Read the Reddit post below. Also take note of the subreddit name.
+In this case ignore points 1, 2, 3, 4, and 5.`;
+        } else if (type === 'answer') {
+          instruction = `Read the Reddit post below. Also take note of the subreddit name.
 If questions are asked, answer them concisely.
 If no questions, offer a concise solution or advice for the situation.
 Even if the post content is empty, use the title and subreddit context to inform your response.
 If images are included, analyze them and incorporate their content into your response.
-Always try to include relevant external links and images to support your answer.`)
-          ),
-        () => ({
-          useWeb: true,
-          mode: 'answer',
-          searchQuery: buildSearchQuery(getSelfText()),
-          searchLimit: 6,
-        })
-      );
-    factCheckBtnEl.onclick = () =>
-      runAction(
-        factCheckContainerEl,
-        factCheckBtnEl,
-        () =>
-          buildPrompt(
-            withMetadata(`Read the Reddit post below. Also take note of the subreddit name.
+Always try to include relevant external links and images to support your answer.`;
+          options.useWeb = true;
+          options.mode = 'answer';
+          options.searchQuery = buildSearchQuery(selfText);
+          options.searchLimit = 6;
+        } else if (type === 'fact-check') {
+          instruction = `Read the Reddit post below. Also take note of the subreddit name.
 Fact check the claims made in the post. Provide evidence-based verification or refutation.
-If images are included, analyze them and incorporate their content into your fact check.`)
-          ),
-        () => ({
-          useWeb: true,
-          mode: 'fact-check',
-          searchQuery: buildSearchQuery(getSelfText()),
-          searchLimit: 6,
-        })
-      );
+If images are included, analyze them and incorporate their content into your fact check.`;
+          options.useWeb = true;
+          options.mode = 'fact-check';
+          options.searchQuery = buildSearchQuery(selfText);
+          options.searchLimit = 6;
+        }
+
+        const fullPrompt = `${instruction}\n\n${context}`;
+        const { puterResText, duration } = await askWithStopwatch(
+          fullPrompt,
+          undefined,
+          postImages,
+          options
+        );
+        renderResult(containerEl, puterResText, duration);
+      } catch (err) {
+        console.error(err);
+        containerEl.textContent =
+          'Sorry, something went wrong. Please try again.';
+      } finally {
+        btnEl.disabled = false;
+        btnEl.textContent = restoreText;
+      }
+    };
+
+    tldrBtnEl.onclick = () => handleAction('tldr', tldrBtnEl, tldrContainerEl);
+    answerBtnEl.onclick = () =>
+      handleAction('answer', answerBtnEl, answerContainerEl);
+    factCheckBtnEl.onclick = () =>
+      handleAction('fact-check', factCheckBtnEl, factCheckContainerEl);
   });
 })();
