@@ -186,7 +186,7 @@ const RedditHandler = {
 
       const combined = [...posts, ...comments];
 
-      return combined
+      const items = combined
         .map(child => {
           const d = child.data;
           return {
@@ -199,9 +199,27 @@ const RedditHandler = {
           };
         })
         .sort((a, b) => b.created_utc - a.created_utc);
+
+      const postCount = items.filter(i => i.type === 'post').length;
+      const commentCount = items.filter(i => i.type === 'comment').length;
+      const timestamps = items.map(i => i.created_utc).filter(t => t);
+      const oldestActivity = timestamps.length ? new Date(Math.min(...timestamps) * 1000).toLocaleDateString() : 'Unknown';
+      const newestActivity = timestamps.length ? new Date(Math.max(...timestamps) * 1000).toLocaleDateString() : 'Unknown';
+
+      return {
+        items,
+        metadata: {
+          postCount,
+          commentCount,
+          totalItems: items.length,
+          oldestActivity,
+          newestActivity,
+          username,
+        },
+      };
     } catch (error) {
       console.error('Error fetching user history:', error);
-      return [];
+      return { items: [], metadata: {} };
     }
   },
 
@@ -280,7 +298,7 @@ ${captions ? `\n\nVideo closed captions: ${captions}` : ''}
         containerEl: ui.analyzeUserContainer,
         getContext: async () => {
           const baseContext = await getContext(); // get selfText etc. if needed, but we mostly need user history
-          const history = await RedditHandler.fetchUserHistory(metadata.author);
+          const { items: history, metadata: analysisMetadata } = await RedditHandler.fetchUserHistory(metadata.author);
 
           if (!history || history.length === 0) {
             alert(
@@ -298,8 +316,16 @@ ${captions ? `\n\nVideo closed captions: ${captions}` : ''}
             )
             .join('\n---\n');
 
+          const metadataSection = `**Analysis Metadata:**
+- Total Items Analyzed: ${analysisMetadata.totalItems}
+- Posts: ${analysisMetadata.postCount}
+- Comments: ${analysisMetadata.commentCount}
+- Activity Range: ${analysisMetadata.oldestActivity} to ${analysisMetadata.newestActivity}`;
+
           const formattedContext = `Target User: ${metadata.author}
-          
+
+${metadataSection}
+
 User History Data:
 ${historyText}`.trim();
 
