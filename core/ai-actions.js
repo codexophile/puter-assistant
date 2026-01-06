@@ -103,6 +103,7 @@ Based *strictly* on the provided content:
 
 2. **Demographic Inference** (Probabilistic):
     - Estimate age range, location/timezone, education level, and socioeconomic status based on content clues.
+    - Determine the person's ethnic/cultural background.
     - Note: State confidence levels for these inferences.
 
 3. **Psychographic Profile**:
