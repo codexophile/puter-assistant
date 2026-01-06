@@ -1,16 +1,16 @@
 {
   "manifest_version": 3,
-  "name": "Gemma AI Explorer",
-  "version": "2.0",
+  "name": "Gemma Explorer",
+  "version": "3.0",
   "permissions": [
     "activeTab",
     "scripting",
-    "storage"
+    "storage",
+    "contextMenus"
   ],
   "host_permissions": [
-    "https://*.reddit.com/*",
-    "https://generativelanguage.googleapis.com/*",
-    "https://html.duckduckgo.com/*"
+    "http://*/*",
+    "https://*/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -18,12 +18,16 @@
   "content_scripts": [
     {
       "matches": [
-        "https://*.reddit.com/*"
+        "http://*/*",
+        "https://*/*"
       ],
       "js": [
         "marked.js",
         "helpers.js",
         "content.js"
+      ],
+      "css": [
+        "styles.css"
       ]
     }
   ]

@@ -1,3 +1,62 @@
+// background.js - Service worker for Puter AI Assistant
+
+// Create context menus when extension is installed
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
+    id: 'puter-explain',
+    title: '✨ AI: Explain',
+    contexts: ['selection'],
+  });
+
+  chrome.contextMenus.create({
+    id: 'puter-summarize',
+    title: '✨ AI: Summarize',
+    contexts: ['selection'],
+  });
+
+  chrome.contextMenus.create({
+    id: 'puter-simplify',
+    title: '✨ AI: Simplify',
+    contexts: ['selection'],
+  });
+
+  chrome.contextMenus.create({
+    id: 'puter-fact-check',
+    title: '✨ AI: Fact Check',
+    contexts: ['selection'],
+  });
+});
+
+// Handle context menu clicks
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (!info.selectionText) return;
+
+  let task = '';
+
+  switch (info.menuItemId) {
+    case 'puter-explain':
+      task = 'explain-selection';
+      break;
+    case 'puter-summarize':
+      task = 'summarize-selection';
+      break;
+    case 'puter-simplify':
+      task = 'simplify-selection';
+      break;
+    case 'puter-fact-check':
+      task = 'fact-check-selection';
+      break;
+  }
+
+  if (task) {
+    chrome.tabs.sendMessage(tab.id, {
+      action: 'processSelection',
+      text: info.selectionText,
+      task: task,
+    });
+  }
+});
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'searchWeb') {
     handleSearchWeb(request.query, request.options)
