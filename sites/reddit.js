@@ -203,8 +203,12 @@ const RedditHandler = {
       const postCount = items.filter(i => i.type === 'post').length;
       const commentCount = items.filter(i => i.type === 'comment').length;
       const timestamps = items.map(i => i.created_utc).filter(t => t);
-      const oldestActivity = timestamps.length ? new Date(Math.min(...timestamps) * 1000).toLocaleDateString() : 'Unknown';
-      const newestActivity = timestamps.length ? new Date(Math.max(...timestamps) * 1000).toLocaleDateString() : 'Unknown';
+      const oldestActivity = timestamps.length
+        ? new Date(Math.min(...timestamps) * 1000).toLocaleDateString()
+        : 'Unknown';
+      const newestActivity = timestamps.length
+        ? new Date(Math.max(...timestamps) * 1000).toLocaleDateString()
+        : 'Unknown';
 
       return {
         items,
@@ -298,7 +302,8 @@ ${captions ? `\n\nVideo closed captions: ${captions}` : ''}
         containerEl: ui.analyzeUserContainer,
         getContext: async () => {
           const baseContext = await getContext(); // get selfText etc. if needed, but we mostly need user history
-          const { items: history, metadata: analysisMetadata } = await RedditHandler.fetchUserHistory(metadata.author);
+          const { items: history, metadata: analysisMetadata } =
+            await RedditHandler.fetchUserHistory(metadata.author);
 
           if (!history || history.length === 0) {
             alert(
