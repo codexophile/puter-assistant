@@ -163,27 +163,42 @@ const RedditHandler = {
     }
   },
 
-  fetchUserHistory: async username => {
+  fetchUserHistory: async (username, postLimit = 60, commentLimit = 60) => {
+    const fetchEndpoint = async (type, limit) => {
+      try {
+        const response = await fetch(
+          `https://www.reddit.com/user/${username}/${type}.json?limit=${limit}`
+        );
+        if (!response.ok) throw new Error(`Failed to fetch user ${type}`);
+        const data = await response.json();
+        return data?.data?.children || [];
+      } catch (error) {
+        console.error(`Error fetching user ${type}:`, error);
+        return [];
+      }
+    };
+
     try {
-      const response = await fetch(
-        `https://www.reddit.com/user/${username}.json?limit=50`
-      );
-      if (!response.ok) throw new Error('Failed to fetch user history');
+      const [posts, comments] = await Promise.all([
+        fetchEndpoint('submitted', postLimit),
+        fetchEndpoint('comments', commentLimit),
+      ]);
 
-      const data = await response.json();
-      const children = data?.data?.children || [];
+      const combined = [...posts, ...comments];
 
-      return children.map(child => {
-        const d = child.data;
-        return {
-          type: child.kind === 't1' ? 'comment' : 'post',
-          subreddit: d.subreddit,
-          title: d.title || '',
-          body: d.selftext || d.body || '',
-          score: d.score,
-          created_utc: d.created_utc,
-        };
-      });
+      return combined
+        .map(child => {
+          const d = child.data;
+          return {
+            type: child.kind === 't1' ? 'comment' : 'post',
+            subreddit: d.subreddit,
+            title: d.title || '',
+            body: d.selftext || d.body || '',
+            score: d.score,
+            created_utc: d.created_utc,
+          };
+        })
+        .sort((a, b) => b.created_utc - a.created_utc);
     } catch (error) {
       console.error('Error fetching user history:', error);
       return [];
