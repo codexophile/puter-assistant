@@ -91,6 +91,28 @@ Always try to include relevant external links and images to support your answer.
     'fact-check': `Read the post below. Also take note of the context.
 Fact check the claims made in the post. Provide evidence-based verification or refutation.
 If images are included, analyze them and incorporate their content into your fact check.`,
+
+    'analyze-user': `You are an expert behavioural analyst and profiler.
+Analyze the provided Reddit user history (posts and comments) to generate a comprehensive psychometric and demographic profile.
+The goal is analytical curiosity and understanding discussion patterns in a research context.
+
+Based *strictly* on the provided content:
+
+1. **Linguistic & Behavioral Patterns**:
+    - Analyze writing style, vocabulary complexity, emotional tone, and consistency.
+
+2. **Demographic Inference** (Probabilistic):
+    - Estimate age range, location/timezone, education level, and socioeconomic status based on content clues.
+    - Note: State confidence levels for these inferences.
+
+3. **Psychographic Profile**:
+    - Infer personality traits (e.g., Big Five), values, interests, and political/ideological leanings.
+
+4. **Community Engagement**:
+    - Analyze content topics, engagement style (confrontational vs. collaborative), and obsessions.
+
+**Format the output as a detailed markdown report.**
+Include a disclaimer at the start: "This profile is an AI-generated probabilistic analysis based on public activity and may not be accurate."`,
   },
 
   /**

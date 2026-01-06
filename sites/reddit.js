@@ -28,12 +28,16 @@ const RedditHandler = {
       '.post-link, [slot="post-media-container"] a'
     );
     const subredditName = postLink?.match(/\/r\/([^\/]+)/)?.[1];
+    const author =
+      postEl.getAttribute('author') ||
+      postEl.querySelector('a[href^="/user/"]')?.textContent?.trim();
 
     if (!postTitle || !subredditName) return null;
 
     return {
       title: postTitle,
       subreddit: subredditName,
+      author: author || 'unknown_user',
       link: postLink,
       attachedLink: attachedLink?.href || '',
     };
@@ -46,7 +50,15 @@ const RedditHandler = {
     const tldrContainer = UIBuilder.createContainer('tldr-container');
     const answerContainer = UIBuilder.createContainer('answer-container');
     const factCheckContainer = UIBuilder.createContainer('factcheck-container');
-    puterEl.append(tldrContainer, answerContainer, factCheckContainer);
+    const analyzeUserContainer = UIBuilder.createContainer(
+      'analyze-user-container'
+    );
+    puterEl.append(
+      tldrContainer,
+      answerContainer,
+      factCheckContainer,
+      analyzeUserContainer
+    );
 
     const tldrBtn = UIBuilder.createActionButton('TL;DR', 'tldr-button');
     const answerBtn = UIBuilder.createActionButton('Answer', 'answer-button');
@@ -54,17 +66,28 @@ const RedditHandler = {
       'Fact Check',
       'factcheck-button'
     );
+    const analyzeUserBtn = UIBuilder.createActionButton(
+      'Profile User',
+      'analyze-user-button'
+    );
 
-    const toolbar = UIBuilder.createToolbar([tldrBtn, answerBtn, factCheckBtn]);
+    const toolbar = UIBuilder.createToolbar([
+      tldrBtn,
+      answerBtn,
+      factCheckBtn,
+      analyzeUserBtn,
+    ]);
     puterEl.appendChild(toolbar);
 
     return {
       tldrBtn,
       answerBtn,
       factCheckBtn,
+      analyzeUserBtn,
       tldrContainer,
       answerContainer,
       factCheckContainer,
+      analyzeUserContainer,
     };
   },
 
@@ -140,6 +163,33 @@ const RedditHandler = {
     }
   },
 
+  fetchUserHistory: async username => {
+    try {
+      const response = await fetch(
+        `https://www.reddit.com/user/${username}.json?limit=50`
+      );
+      if (!response.ok) throw new Error('Failed to fetch user history');
+
+      const data = await response.json();
+      const children = data?.data?.children || [];
+
+      return children.map(child => {
+        const d = child.data;
+        return {
+          type: child.kind === 't1' ? 'comment' : 'post',
+          subreddit: d.subreddit,
+          title: d.title || '',
+          body: d.selftext || d.body || '',
+          score: d.score,
+          created_utc: d.created_utc,
+        };
+      });
+    } catch (error) {
+      console.error('Error fetching user history:', error);
+      return [];
+    }
+  },
+
   attachHandlers: (ui, metadata, postEl) => {
     const getContext = async () => {
       const selfText = RedditHandler.extractContent(postEl);
@@ -204,6 +254,42 @@ ${captions ? `\n\nVideo closed captions: ${captions}` : ''}
         buttonEl: ui.factCheckBtn,
         containerEl: ui.factCheckContainer,
         getContext,
+        buildInstruction,
+        buildOptions,
+      });
+
+    ui.analyzeUserBtn.onclick = () =>
+      AIActions.execute({
+        type: 'analyze-user',
+        buttonEl: ui.analyzeUserBtn,
+        containerEl: ui.analyzeUserContainer,
+        getContext: async () => {
+          const baseContext = await getContext(); // get selfText etc. if needed, but we mostly need user history
+          const history = await RedditHandler.fetchUserHistory(metadata.author);
+
+          if (!history || history.length === 0) {
+            alert(
+              'Could not fetch user history or user has no public history.'
+            );
+            throw new Error('No user history');
+          }
+
+          const historyText = history
+            .map(
+              h =>
+                `[${h.type.toUpperCase()}] r/${h.subreddit} (Score: ${
+                  h.score
+                }): ${h.title} ${h.body}`
+            )
+            .join('\n---\n');
+
+          const formattedContext = `Target User: ${metadata.author}
+          
+User History Data:
+${historyText}`.trim();
+
+          return { ...baseContext, formattedContext };
+        },
         buildInstruction,
         buildOptions,
       });
