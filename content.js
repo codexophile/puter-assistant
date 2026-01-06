@@ -444,7 +444,7 @@ Provide a helpful and concise response. If the question is about the current pag
 
   // Initialize appropriate site handlers
   const activeSiteHandlers = [];
-  
+
   for (const handler of siteHandlers) {
     if (handler && handler.shouldActivate && handler.shouldActivate()) {
       try {

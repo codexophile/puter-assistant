@@ -5,6 +5,7 @@ This directory contains site-specific functionality for the Puter AI Assistant.
 ## Structure
 
 Each site handler is a self-contained module that:
+
 1. Detects if it should run on the current page
 2. Extracts content and metadata specific to that site
 3. Builds appropriate UI elements
@@ -15,6 +16,7 @@ Each site handler is a self-contained module that:
 1. **Copy the template**: Use `_template.js` as your starting point
 2. **Rename**: Name your file after the site (e.g., `youtube.js`, `twitter.js`)
 3. **Implement required methods**:
+
    - `shouldActivate()` - Detection logic
    - `init()` - Initialization and element watching
    - `extractMetadata()` - Get title, author, etc.
@@ -23,14 +25,16 @@ Each site handler is a self-contained module that:
    - `attachHandlers()` - Wire up click handlers
 
 4. **Register in content.js**:
+
 ```javascript
 const siteHandlers = [
   window.RedditHandler,
-  window.YouTubeHandler,  // Add your handler here
+  window.YouTubeHandler, // Add your handler here
 ];
 ```
 
 5. **Update manifest.json**:
+
 ```json
 "js": [
   "marked.js",
@@ -46,7 +50,9 @@ const siteHandlers = [
 ## Available Utilities
 
 ### Core Modules
+
 - **UIBuilder**: Helpers for creating consistent UI
+
   - `createActionButton(label, className)`
   - `createContainer(className)`
   - `createToolbar(buttons)`
@@ -59,6 +65,7 @@ const siteHandlers = [
   - `buildSearchQuery(title, text, maxLength)` - Query builder
 
 ### Helpers (from helpers.js)
+
 - `askWithStopwatch(prompt, model, images, options)` - AI API call
 - `fetchImageAsBase64(url)` - Image fetching
 - `waitForEach(selector, callback)` - DOM observer
@@ -67,6 +74,7 @@ const siteHandlers = [
 ## Example: Reddit Handler
 
 See `reddit.js` for a complete implementation that:
+
 - Watches for Reddit posts using `waitForEach`
 - Extracts post metadata (title, subreddit, links)
 - Handles text, images, and video captions
@@ -75,17 +83,20 @@ See `reddit.js` for a complete implementation that:
 ## Best Practices
 
 1. **Always check for existing attachments**:
+
 ```javascript
 if (element.dataset.puterAttached) return;
 element.dataset.puterAttached = '1';
 ```
 
 2. **Use optional chaining for DOM queries**:
+
 ```javascript
 const title = element.querySelector('.title')?.textContent?.trim();
 ```
 
 3. **Filter images appropriately**:
+
 ```javascript
 if (src && !src.includes('icon') && img.width > 200) {
   imageUrls.push(src);
@@ -93,6 +104,7 @@ if (src && !src.includes('icon') && img.width > 200) {
 ```
 
 4. **Provide contextual prompts**:
+
 ```javascript
 const formattedContext = `
 Platform: ${siteName}
@@ -102,6 +114,7 @@ Content: ${content}
 ```
 
 5. **Handle errors gracefully**:
+
 ```javascript
 try {
   // extraction logic

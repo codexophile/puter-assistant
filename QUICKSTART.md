@@ -16,7 +16,7 @@ const YouTubeHandler = {
     console.log('🎯 Initializing YouTube handler');
 
     // Wait for video pages to load
-    waitForEach('#primary-inner', async (videoArea) => {
+    waitForEach('#primary-inner', async videoArea => {
       if (videoArea.dataset.puterAttached) return;
       videoArea.dataset.puterAttached = '1';
 
@@ -29,55 +29,75 @@ const YouTubeHandler = {
   },
 
   extractMetadata: () => {
-    const title = document.querySelector('h1.ytd-watch-metadata yt-formatted-string')?.textContent?.trim();
-    const channel = document.querySelector('ytd-channel-name a')?.textContent?.trim();
-    
+    const title = document
+      .querySelector('h1.ytd-watch-metadata yt-formatted-string')
+      ?.textContent?.trim();
+    const channel = document
+      .querySelector('ytd-channel-name a')
+      ?.textContent?.trim();
+
     if (!title) return null;
-    
+
     return { title, channel: channel || 'Unknown' };
   },
 
-  buildUI: (container) => {
+  buildUI: container => {
     // Create our UI container
     const puterContainer = UIBuilder.createContainer('puter-content');
-    
+
     // Create buttons
-    const summarizeBtn = UIBuilder.createActionButton('📝 Summarize', 'summarize-button');
-    const keyPointsBtn = UIBuilder.createActionButton('🎯 Key Points', 'keypoints-button');
-    
+    const summarizeBtn = UIBuilder.createActionButton(
+      '📝 Summarize',
+      'summarize-button'
+    );
+    const keyPointsBtn = UIBuilder.createActionButton(
+      '🎯 Key Points',
+      'keypoints-button'
+    );
+
     // Create result containers
     const summarizeContainer = UIBuilder.createContainer('summarize-container');
     const keyPointsContainer = UIBuilder.createContainer('keypoints-container');
-    
+
     puterContainer.append(summarizeContainer, keyPointsContainer);
-    
+
     // Create toolbar
     const toolbar = UIBuilder.createToolbar([summarizeBtn, keyPointsBtn]);
     puterContainer.appendChild(toolbar);
-    
+
     // Insert after description
     const description = document.querySelector('#description-inline-expander');
     if (description) {
       description.after(puterContainer);
     }
-    
-    return { summarizeBtn, keyPointsBtn, summarizeContainer, keyPointsContainer };
+
+    return {
+      summarizeBtn,
+      keyPointsBtn,
+      summarizeContainer,
+      keyPointsContainer,
+    };
   },
 
   extractContent: () => {
     // Get video description
-    const description = document.querySelector('#description-inline-expander yt-attributed-string')?.textContent || '';
-    
+    const description =
+      document.querySelector(
+        '#description-inline-expander yt-attributed-string'
+      )?.textContent || '';
+
     // Try to get transcript if available
-    const transcriptBtn = document.querySelector('[aria-label*="transcript" i]');
-    
+    const transcriptBtn = document.querySelector(
+      '[aria-label*="transcript" i]'
+    );
+
     return description;
   },
 
   attachHandlers: (ui, metadata) => {
     const getContext = async () => {
       const content = YouTubeHandler.extractContent();
-      
+
       return {
         formattedContext: `
 Video Title: ${metadata.title}
@@ -86,11 +106,11 @@ Description:
 ${content}
         `.trim(),
         images: [],
-        content
+        content,
       };
     };
 
-    const buildInstruction = (type) => {
+    const buildInstruction = type => {
       if (type === 'summarize') {
         return `Summarize this YouTube video based on its title and description. 
 Focus on the main topics covered and key takeaways.`;
@@ -103,7 +123,7 @@ Highlight the most important information viewers should know.`;
 
     const buildOptions = (type, context) => ({
       useWeb: false,
-      mode: 'answer'
+      mode: 'answer',
     });
 
     ui.summarizeBtn.onclick = () =>
@@ -142,7 +162,7 @@ Edit `content.js` around line 410:
 ```javascript
 const siteHandlers = [
   window.RedditHandler,
-  window.YouTubeHandler,  // Add this line
+  window.YouTubeHandler, // Add this line
 ];
 ```
 
@@ -174,6 +194,7 @@ Edit `manifest.json`:
 ## That's It! 🎉
 
 You just added YouTube support in ~100 lines of code. The modular architecture handles:
+
 - ✅ Loading states
 - ✅ Error handling
 - ✅ UI rendering
@@ -181,6 +202,7 @@ You just added YouTube support in ~100 lines of code. The modular architecture h
 - ✅ Response formatting
 
 All you did was define:
+
 1. When to activate (YouTube URLs)
 2. What to extract (title, channel, description)
 3. Where to put UI (after description)
@@ -191,6 +213,7 @@ All you did was define:
 ## Add More Sites
 
 Follow the same pattern for:
+
 - **Twitter/X**: Summarize threads, fact-check claims
 - **GitHub**: Explain code, review PRs
 - **Stack Overflow**: Generate better answers

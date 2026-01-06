@@ -28,14 +28,16 @@ puter-assistant/
 ### 1. Dispatcher Pattern (content.js)
 
 The main content script:
+
 - Initializes the universal floating AI panel
 - Registers all site handlers
 - Activates handlers based on current URL
 - Manages handler lifecycle
 
-### 2. Site Handlers (sites/*.js)
+### 2. Site Handlers (sites/\*.js)
 
 Each site handler exports:
+
 ```javascript
 {
   shouldActivate: () => boolean,  // Detection
@@ -44,9 +46,10 @@ Each site handler exports:
 }
 ```
 
-### 3. Core Modules (core/*.js)
+### 3. Core Modules (core/\*.js)
 
 Shared utilities used by all handlers:
+
 - **UIBuilder**: Creates consistent UI elements
 - **AIActions**: Handles AI execution lifecycle
 
@@ -69,7 +72,7 @@ const YouTubeHandler = {
   },
 
   init: async () => {
-    waitForEach('ytd-watch-flexy', async (videoPage) => {
+    waitForEach('ytd-watch-flexy', async videoPage => {
       if (videoPage.dataset.puterAttached) return;
       videoPage.dataset.puterAttached = '1';
 
@@ -79,16 +82,16 @@ const YouTubeHandler = {
     });
   },
 
-  extractMetadata: (element) => {
+  extractMetadata: element => {
     const title = document.querySelector('h1.title')?.textContent;
     return { title };
   },
 
-  buildUI: (element) => {
+  buildUI: element => {
     const container = UIBuilder.createContainer('puter-content');
     const btn = UIBuilder.createActionButton('Summarize Video', 'summary-btn');
     const resultContainer = UIBuilder.createContainer('result-container');
-    
+
     const toolbar = UIBuilder.createToolbar([btn]);
     container.append(resultContainer, toolbar);
     element.append(container);
@@ -96,14 +99,16 @@ const YouTubeHandler = {
     return { btn, resultContainer };
   },
 
-  extractContent: (element) => {
+  extractContent: element => {
     const description = document.querySelector('#description')?.textContent;
     return description || '';
   },
 
   attachHandlers: (ui, metadata, element) => {
     const getContext = async () => ({
-      formattedContext: `Video: ${metadata.title}\nDescription: ${YouTubeHandler.extractContent(element)}`,
+      formattedContext: `Video: ${
+        metadata.title
+      }\nDescription: ${YouTubeHandler.extractContent(element)}`,
       images: [],
     });
 
@@ -113,7 +118,7 @@ const YouTubeHandler = {
         buttonEl: ui.btn,
         containerEl: ui.resultContainer,
         getContext,
-        buildInstruction: (type) => AIActions.instructions[type],
+        buildInstruction: type => AIActions.instructions[type],
         buildOptions: () => ({ useWeb: false }),
       });
   },
@@ -130,7 +135,7 @@ window.YouTubeHandler = YouTubeHandler;
 // content.js
 const siteHandlers = [
   window.RedditHandler,
-  window.YouTubeHandler,  // Add here
+  window.YouTubeHandler, // Add here
 ];
 ```
 
@@ -173,31 +178,34 @@ const siteHandlers = [
 ## 🔧 Available Utilities
 
 ### From UIBuilder
+
 ```javascript
-UIBuilder.createActionButton(label, className)
-UIBuilder.createContainer(className)
-UIBuilder.createToolbar(buttons)
-UIBuilder.renderResult(containerEl, markdown, duration)
-UIBuilder.sanitize(html)
+UIBuilder.createActionButton(label, className);
+UIBuilder.createContainer(className);
+UIBuilder.createToolbar(buttons);
+UIBuilder.renderResult(containerEl, markdown, duration);
+UIBuilder.sanitize(html);
 ```
 
 ### From AIActions
+
 ```javascript
-AIActions.execute(config)
-AIActions.instructions.tldr
-AIActions.instructions.answer
-AIActions.instructions['fact-check']
-AIActions.buildSearchQuery(title, text, maxLength)
+AIActions.execute(config);
+AIActions.instructions.tldr;
+AIActions.instructions.answer;
+AIActions.instructions['fact-check'];
+AIActions.buildSearchQuery(title, text, maxLength);
 ```
 
 ### From helpers.js
+
 ```javascript
-askWithStopwatch(prompt, model, images, options)
-fetchImageAsBase64(url)
-waitForEach(selector, callback)
-generateElements(html)
-searchWeb(query, options)
-getSecret(key)
+askWithStopwatch(prompt, model, images, options);
+fetchImageAsBase64(url);
+waitForEach(selector, callback);
+generateElements(html);
+searchWeb(query, options);
+getSecret(key);
 ```
 
 ## 🎨 Standard Action Flow
@@ -208,16 +216,16 @@ ui.actionBtn.onclick = () =>
     type: 'tldr',                    // Action identifier
     buttonEl: ui.actionBtn,          // Button to manage
     containerEl: ui.resultContainer, // Where to show result
-    
+
     getContext: async () => ({       // Gather data
       formattedContext: `...`,
       images: [...],
       content: '...'
     }),
-    
+
     buildInstruction: (type) =>      // Get instruction template
       AIActions.instructions[type],
-    
+
     buildOptions: (type, context) => ({ // Configure API call
       useWeb: type === 'answer',
       mode: type,
@@ -254,6 +262,7 @@ ui.actionBtn.onclick = () =>
 ## 🔄 Migration Notes
 
 The old monolithic `content.js` has been split:
+
 - Universal features (floating panel, chat) → Still in `content.js`
 - Reddit-specific code → `sites/reddit.js`
 - Shared UI patterns → `core/ui-builder.js`

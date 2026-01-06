@@ -9,32 +9,42 @@ Provides consistent UI components and rendering utilities.
 ### Functions
 
 #### `sanitize(html)`
+
 Removes dangerous elements (scripts, styles) from HTML.
+
 ```javascript
 const safe = UIBuilder.sanitize(userGeneratedHtml);
 ```
 
 #### `renderResult(containerEl, markdown, duration)`
+
 Parses markdown and renders it safely with generation time.
+
 ```javascript
 UIBuilder.renderResult(containerEl, responseText, 1250);
 // Outputs: [rendered markdown] (Generated in 1250 ms)
 ```
 
 #### `createActionButton(label, className)`
+
 Creates a styled button element.
+
 ```javascript
 const btn = UIBuilder.createActionButton('Summarize', 'summary-button');
 ```
 
 #### `createContainer(className)`
+
 Creates a div container with specified class.
+
 ```javascript
 const container = UIBuilder.createContainer('results-container');
 ```
 
 #### `createToolbar(buttons)`
+
 Creates a toolbar with AI icon and buttons.
+
 ```javascript
 const toolbar = UIBuilder.createToolbar([btn1, btn2, btn3]);
 ```
@@ -48,9 +58,11 @@ Generic AI action execution framework.
 ### Main Function
 
 #### `AIActions.execute(config)`
+
 Executes an AI action with full lifecycle management.
 
 **Config object:**
+
 ```javascript
 {
   type: 'tldr',              // Action type identifier
@@ -75,6 +87,7 @@ Executes an AI action with full lifecycle management.
 ```
 
 **What it does:**
+
 1. Disables button, sets "Working…" state
 2. Calls `getContext()` to gather data
 3. Builds instruction from `type`
@@ -90,15 +103,19 @@ Executes an AI action with full lifecycle management.
 Pre-built instruction templates for common actions.
 
 #### `AIActions.instructions.tldr`
+
 Comprehensive summarization with bias detection, sarcasm analysis, etc.
 
 #### `AIActions.instructions.answer`
+
 Answers questions or provides solutions with web research support.
 
 #### `AIActions.instructions['fact-check']`
+
 Verifies claims with evidence-based checking.
 
 **Usage:**
+
 ```javascript
 const instruction = AIActions.instructions[type];
 ```
@@ -106,7 +123,9 @@ const instruction = AIActions.instructions[type];
 ### Utilities
 
 #### `AIActions.buildSearchQuery(title, bodyText, maxLength = 240)`
+
 Creates compact search query from title and body.
+
 ```javascript
 const query = AIActions.buildSearchQuery(
   'How to fix CORS errors?',
@@ -135,11 +154,11 @@ const toolbar = UIBuilder.createToolbar([ui.tldrBtn]);
 const getContext = async () => {
   const text = element.textContent;
   const images = await extractImages(element);
-  
+
   return {
     formattedContext: `Title: ${title}\nContent: ${text}`,
     images,
-    text
+    text,
   };
 };
 
@@ -150,10 +169,11 @@ const buildInstruction = type => AIActions.instructions[type];
 const buildOptions = (type, context) => ({
   useWeb: type === 'answer',
   mode: type,
-  searchQuery: type === 'answer' 
-    ? AIActions.buildSearchQuery(title, context.text)
-    : undefined,
-  searchLimit: 5
+  searchQuery:
+    type === 'answer'
+      ? AIActions.buildSearchQuery(title, context.text)
+      : undefined,
+  searchLimit: 5,
 });
 
 // 5. Attach handler
@@ -184,11 +204,13 @@ ui.tldrBtn.onclick = () =>
 ## Adding New Action Types
 
 1. **Add instruction template** to `AIActions.instructions`:
+
 ```javascript
 AIActions.instructions.translate = `Translate the following content to English...`;
 ```
 
 2. **Use in site handler**:
+
 ```javascript
 translateBtn.onclick = () =>
   AIActions.execute({
@@ -202,6 +224,7 @@ translateBtn.onclick = () =>
 ```
 
 3. **Customize options** in `buildOptions`:
+
 ```javascript
 const buildOptions = (type, context) => {
   if (type === 'translate') {

@@ -5,6 +5,7 @@
 The extension has been completely restructured from a monolithic architecture to a clean, modular system.
 
 ### Before
+
 ```
 puter-assistant/
 ├── content.js          # 671 lines - everything in one file
@@ -14,6 +15,7 @@ puter-assistant/
 ```
 
 ### After
+
 ```
 puter-assistant/
 ├── core/                      # Shared functionality
@@ -35,30 +37,35 @@ puter-assistant/
 ## Key Improvements
 
 ### 1. **Separation of Concerns**
+
 - Universal features (floating panel) stay in content.js
 - Reddit-specific code moved to sites/reddit.js
 - Shared utilities extracted to core modules
 - Each concern has its own file and responsibility
 
 ### 2. **Code Reusability**
+
 - `UIBuilder` provides consistent UI components
 - `AIActions` handles execution lifecycle
 - No more repeated loading states, error handling
 - Standard instruction templates
 
 ### 3. **Easy Extensibility**
+
 - Add new sites without touching existing code
 - Template file with full documentation
 - Simple registration in content.js + manifest.json
 - ~100 lines of code per new site
 
 ### 4. **Better Maintainability**
+
 - Bug fixes in core benefit all sites
 - Clear structure makes code easy to find
 - Comprehensive documentation
 - Type-safe-ish with JSDoc comments
 
 ### 5. **Consistent UX**
+
 - All sites use same UI patterns
 - Identical loading states
 - Uniform error handling
@@ -67,16 +74,19 @@ puter-assistant/
 ## Files Created
 
 ### Core Modules
+
 - ✅ `core/ai-actions.js` - Generic AI action execution framework
 - ✅ `core/ui-builder.js` - Reusable UI component builders
 - ✅ `core/README.md` - Core modules documentation
 
 ### Site Handlers
+
 - ✅ `sites/reddit.js` - Reddit-specific functionality (refactored from content.js)
 - ✅ `sites/_template.js` - Template for creating new handlers
 - ✅ `sites/README.md` - Handler development guide
 
 ### Documentation
+
 - ✅ `ARCHITECTURE.md` - Complete architecture overview
 - ✅ `QUICKSTART.md` - Quick start guide with YouTube example
 
@@ -95,6 +105,7 @@ puter-assistant/
 ## Backward Compatibility
 
 ✅ **100% compatible** - All existing functionality preserved:
+
 - Universal floating AI panel works identically
 - Reddit features work identically
 - Same API calls, same prompts
@@ -106,6 +117,7 @@ puter-assistant/
 To verify everything works:
 
 ### Reddit
+
 - [ ] TL;DR button appears on posts
 - [ ] TL;DR generates summaries correctly
 - [ ] Answer button appears on posts
@@ -118,6 +130,7 @@ To verify everything works:
 - [ ] Errors are handled gracefully
 
 ### Universal Panel
+
 - [ ] Floating ✨ AI button appears
 - [ ] Panel opens/closes correctly
 - [ ] Chat tab works
@@ -128,6 +141,7 @@ To verify everything works:
 - [ ] All action buttons function
 
 ### Console
+
 - [ ] No errors in console
 - [ ] Activation message appears: `✅ Activated handler for reddit.com`
 - [ ] No duplicate handlers running
@@ -135,11 +149,13 @@ To verify everything works:
 ## Next Steps
 
 ### For You
+
 1. Test the refactored extension
 2. Verify Reddit functionality works
 3. Try adding a new site (YouTube example in QUICKSTART.md)
 
 ### Future Enhancements
+
 1. Add more site handlers (YouTube, Twitter, etc.)
 2. Create shared prompt library for common tasks
 3. Add configuration UI for enabling/disabling sites
@@ -148,14 +164,14 @@ To verify everything works:
 
 ## Benefits Summary
 
-| Before | After |
-|--------|-------|
+| Before                   | After                        |
+| ------------------------ | ---------------------------- |
 | 671-line monolithic file | Modular, organized structure |
-| Repeated code patterns | DRY with shared utilities |
-| Hard to add new sites | Template + register = done |
-| All logic entangled | Clear separation of concerns |
-| Limited documentation | Comprehensive guides |
-| Difficult to test | Testable modules |
+| Repeated code patterns   | DRY with shared utilities    |
+| Hard to add new sites    | Template + register = done   |
+| All logic entangled      | Clear separation of concerns |
+| Limited documentation    | Comprehensive guides         |
+| Difficult to test        | Testable modules             |
 
 ## Questions?
 

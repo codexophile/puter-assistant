@@ -47,7 +47,8 @@ const AIActions = {
       }
     } catch (err) {
       console.error(err);
-      containerEl.textContent = 'Sorry, something went wrong. Please try again.';
+      containerEl.textContent =
+        'Sorry, something went wrong. Please try again.';
     } finally {
       buttonEl.disabled = false;
       buttonEl.textContent = restoreText;
