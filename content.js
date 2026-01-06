@@ -22,6 +22,33 @@
     return button;
   };
 
+  // Load and apply theme
+  const loadTheme = async () => {
+    const { puterTheme = 'dark' } = await chrome.storage.local.get(
+      'puterTheme'
+    );
+    if (puterTheme === 'light') {
+      document.documentElement.classList.add('light-mode');
+    } else {
+      document.documentElement.classList.remove('light-mode');
+    }
+  };
+
+  // Toggle theme
+  const toggleTheme = async () => {
+    const { puterTheme = 'dark' } = await chrome.storage.local.get(
+      'puterTheme'
+    );
+    const newTheme = puterTheme === 'dark' ? 'light' : 'dark';
+    await chrome.storage.local.set({ puterTheme: newTheme });
+
+    if (newTheme === 'light') {
+      document.documentElement.classList.add('light-mode');
+    } else {
+      document.documentElement.classList.remove('light-mode');
+    }
+  };
+
   // Create chat panel
   const createChatPanel = () => {
     const panel = document.createElement('div');
@@ -29,7 +56,10 @@
     panel.innerHTML = `
       <div class="puter-header">
         <h3>✨ AI Assistant</h3>
-        <button class="puter-close" title="Close">×</button>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button class="puter-theme-toggle" title="Toggle dark/light mode" style="background: rgba(255, 255, 255, 0.2); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; line-height: 1;">🌙</button>
+          <button class="puter-close" title="Close">×</button>
+        </div>
       </div>
       <div class="puter-tabs">
         <button class="puter-tab active" data-tab="chat">Chat</button>
@@ -311,6 +341,9 @@ Provide a helpful and concise response. If the question is about the current pag
   const floatingBtn = createFloatingButton();
   const chatPanel = createChatPanel();
 
+  // Load theme on startup
+  await loadTheme();
+
   // Toggle panel
   floatingBtn.addEventListener('click', () => {
     chatPanel.classList.toggle('open');
@@ -320,6 +353,24 @@ Provide a helpful and concise response. If the question is about the current pag
   chatPanel.querySelector('.puter-close').addEventListener('click', () => {
     chatPanel.classList.remove('open');
   });
+
+  // Theme toggle button
+  chatPanel
+    .querySelector('.puter-theme-toggle')
+    .addEventListener('click', async e => {
+      e.stopPropagation();
+      await toggleTheme();
+      const { puterTheme = 'dark' } = await chrome.storage.local.get(
+        'puterTheme'
+      );
+      const btn = e.target;
+      btn.textContent = puterTheme === 'dark' ? '🌙' : '☀️';
+    });
+
+  // Set initial theme toggle button icon
+  const { puterTheme = 'dark' } = await chrome.storage.local.get('puterTheme');
+  const themeBtn = chatPanel.querySelector('.puter-theme-toggle');
+  themeBtn.textContent = puterTheme === 'dark' ? '🌙' : '☀️';
 
   // Tab switching
   chatPanel.querySelectorAll('.puter-tab').forEach(tab => {

@@ -1,5 +1,82 @@
 /* Puter AI Assistant Styles */
 
+/* CSS Variables for Theme Support */
+:root {
+  /* Dark mode (default) */
+  --puter-bg-primary: #1e1e1e;
+  --puter-bg-secondary: #2d2d2d;
+  --puter-bg-tertiary: #3a3a3a;
+  --puter-text-primary: #e0e0e0;
+  --puter-text-secondary: #a0a0a0;
+  --puter-border-color: #444;
+  --puter-accent-primary: #667eea;
+  --puter-accent-secondary: #764ba2;
+  --puter-message-user-bg: #667eea;
+  --puter-message-user-text: #fff;
+  --puter-message-assistant-bg: #2a2a2a;
+  --puter-message-assistant-text: #e0e0e0;
+  --puter-input-bg: #2d2d2d;
+  --puter-input-text: #e0e0e0;
+  --puter-input-border: #444;
+  --puter-input-focus-border: #667eea;
+  --puter-scrollbar-track: #2d2d2d;
+  --puter-scrollbar-thumb: #555;
+  --puter-scrollbar-thumb-hover: #777;
+  --puter-tab-bg: #2d2d2d;
+  --puter-tab-text: #909090;
+  --puter-tab-active-text: #667eea;
+  --puter-tab-hover-bg: rgba(102, 126, 234, 0.1);
+  --puter-action-btn-bg: #2d2d2d;
+  --puter-action-btn-text: #667eea;
+  --puter-action-btn-border: #667eea;
+  --puter-selection-info-bg: #2a3a4a;
+  --puter-selection-info-border: #667eea;
+  --puter-selection-info-text: #b0b0b0;
+  --puter-error-bg: #3a2626;
+  --puter-error-text: #ff8888;
+  --puter-error-border: #dd4444;
+  --puter-link-color: #667eea;
+  --puter-header-shadow: rgba(0, 0, 0, 0.5);
+}
+
+/* Light mode variant (optional) */
+:root.light-mode {
+  --puter-bg-primary: #ffffff;
+  --puter-bg-secondary: #f5f5f5;
+  --puter-bg-tertiary: #efefef;
+  --puter-text-primary: #333333;
+  --puter-text-secondary: #666666;
+  --puter-border-color: #ddd;
+  --puter-accent-primary: #667eea;
+  --puter-accent-secondary: #764ba2;
+  --puter-message-user-bg: #667eea;
+  --puter-message-user-text: #fff;
+  --puter-message-assistant-bg: #f0f0f0;
+  --puter-message-assistant-text: #333;
+  --puter-input-bg: #ffffff;
+  --puter-input-text: #333333;
+  --puter-input-border: #ddd;
+  --puter-input-focus-border: #667eea;
+  --puter-scrollbar-track: #f1f1f1;
+  --puter-scrollbar-thumb: #ccc;
+  --puter-scrollbar-thumb-hover: #999;
+  --puter-tab-bg: #f5f5f5;
+  --puter-tab-text: #666;
+  --puter-tab-active-text: #667eea;
+  --puter-tab-hover-bg: rgba(102, 126, 234, 0.05);
+  --puter-action-btn-bg: #ffffff;
+  --puter-action-btn-text: #667eea;
+  --puter-action-btn-border: #667eea;
+  --puter-selection-info-bg: #f0f7ff;
+  --puter-selection-info-border: #667eea;
+  --puter-selection-info-text: #555;
+  --puter-error-bg: #fee;
+  --puter-error-text: #c33;
+  --puter-error-border: #f44;
+  --puter-link-color: #667eea;
+  --puter-header-shadow: rgba(0, 0, 0, 0.2);
+}
+
 /* Floating Button */
 #puter-assistant-btn {
   position: fixed;
@@ -8,7 +85,11 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(
+    135deg,
+    var(--puter-accent-primary) 0%,
+    var(--puter-accent-secondary) 100%
+  );
   color: white;
   border: none;
   font-size: 16px;
@@ -41,7 +122,7 @@
   right: -450px;
   width: 450px;
   height: 100vh;
-  background: white;
+  background: var(--puter-bg-primary);
   box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
   z-index: 999999;
   display: flex;
@@ -58,13 +139,17 @@
 
 /* Header */
 .puter-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(
+    135deg,
+    var(--puter-accent-primary) 0%,
+    var(--puter-accent-secondary) 100%
+  );
   color: white;
   padding: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px var(--puter-header-shadow);
 }
 
 .puter-header h3 {
@@ -96,8 +181,8 @@
 /* Tabs */
 .puter-tabs {
   display: flex;
-  background: #f5f5f5;
-  border-bottom: 1px solid #ddd;
+  background: var(--puter-tab-bg);
+  border-bottom: 1px solid var(--puter-border-color);
 }
 
 .puter-tab {
@@ -108,20 +193,20 @@
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  color: #666;
+  color: var(--puter-tab-text);
   transition: all 0.2s;
   border-bottom: 3px solid transparent;
 }
 
 .puter-tab:hover {
-  background: rgba(102, 126, 234, 0.05);
-  color: #667eea;
+  background: var(--puter-tab-hover-bg);
+  color: var(--puter-tab-active-text);
 }
 
 .puter-tab.active {
-  color: #667eea;
-  border-bottom-color: #667eea;
-  background: white;
+  color: var(--puter-tab-active-text);
+  border-bottom-color: var(--puter-tab-active-text);
+  background: var(--puter-bg-secondary);
 }
 
 /* Content */
@@ -164,20 +249,20 @@
 
 .puter-message.user {
   align-self: flex-end;
-  background: #667eea;
-  color: white;
+  background: var(--puter-message-user-bg);
+  color: var(--puter-message-user-text);
   border-bottom-right-radius: 4px;
 }
 
 .puter-message.assistant {
   align-self: flex-start;
-  background: #f0f0f0;
-  color: #333;
+  background: var(--puter-message-assistant-bg);
+  color: var(--puter-message-assistant-text);
   border-bottom-left-radius: 4px;
 }
 
 .puter-message.assistant a {
-  color: #667eea;
+  color: var(--puter-link-color);
   text-decoration: underline;
 }
 
@@ -201,8 +286,8 @@
 
 .puter-input-container {
   padding: 15px;
-  background: #f9f9f9;
-  border-top: 1px solid #ddd;
+  background: var(--puter-bg-secondary);
+  border-top: 1px solid var(--puter-border-color);
   display: flex;
   gap: 10px;
 }
@@ -210,22 +295,24 @@
 #puter-input {
   flex: 1;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--puter-input-border);
   border-radius: 8px;
   font-size: 14px;
   font-family: inherit;
   resize: none;
   outline: none;
   transition: border-color 0.2s;
+  background: var(--puter-input-bg);
+  color: var(--puter-input-text);
 }
 
 #puter-input:focus {
-  border-color: #667eea;
+  border-color: var(--puter-input-focus-border);
 }
 
 #puter-send {
   padding: 10px 20px;
-  background: #667eea;
+  background: var(--puter-accent-primary);
   color: white;
   border: none;
   border-radius: 8px;
@@ -240,7 +327,7 @@
 }
 
 #puter-send:disabled {
-  background: #ccc;
+  background: var(--puter-text-secondary);
   cursor: not-allowed;
 }
 
@@ -250,14 +337,14 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--puter-border-color);
 }
 
 .puter-action-btn {
   padding: 12px;
-  background: white;
-  border: 2px solid #667eea;
-  color: #667eea;
+  background: var(--puter-action-btn-bg);
+  border: 2px solid var(--puter-action-btn-border);
+  color: var(--puter-action-btn-text);
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
@@ -270,7 +357,7 @@
 }
 
 .puter-action-btn:hover {
-  background: #667eea;
+  background: var(--puter-accent-primary);
   color: white;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
@@ -287,12 +374,12 @@
   padding: 20px;
   font-size: 14px;
   line-height: 1.6;
-  color: #333;
+  color: var(--puter-text-primary);
 }
 
 .puter-page-result a,
 .puter-selection-result a {
-  color: #667eea;
+  color: var(--puter-link-color);
   text-decoration: underline;
 }
 
@@ -316,34 +403,36 @@
 .puter-selection-result h2,
 .puter-selection-result h3 {
   margin: 16px 0 8px 0;
-  color: #333;
+  color: var(--puter-text-primary);
 }
 
 /* Selection Tab */
 .puter-selection-info {
   padding: 15px;
-  background: #f0f7ff;
-  border-left: 4px solid #667eea;
+  background: var(--puter-selection-info-bg);
+  border-left: 4px solid var(--puter-selection-info-border);
   margin: 20px;
   font-size: 13px;
-  color: #555;
+  color: var(--puter-selection-info-text);
   border-radius: 4px;
 }
 
 #puter-selection-text {
   margin: 0 20px;
   padding: 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--puter-input-border);
   border-radius: 8px;
   font-size: 14px;
   font-family: inherit;
   resize: vertical;
   outline: none;
   transition: border-color 0.2s;
+  background: var(--puter-input-bg);
+  color: var(--puter-input-text);
 }
 
 #puter-selection-text:focus {
-  border-color: #667eea;
+  border-color: var(--puter-input-focus-border);
 }
 
 .puter-selection-actions {
@@ -383,9 +472,9 @@
 /* Error Message */
 .puter-error {
   padding: 12px;
-  background: #fee;
-  border-left: 4px solid #f44;
-  color: #c33;
+  background: var(--puter-error-bg);
+  border-left: 4px solid var(--puter-error-border);
+  color: var(--puter-error-text);
   font-size: 14px;
   border-radius: 4px;
 }
@@ -400,18 +489,18 @@
 .puter-messages::-webkit-scrollbar-track,
 .puter-page-result::-webkit-scrollbar-track,
 .puter-selection-result::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--puter-scrollbar-track);
 }
 
 .puter-messages::-webkit-scrollbar-thumb,
 .puter-page-result::-webkit-scrollbar-thumb,
 .puter-selection-result::-webkit-scrollbar-thumb {
-  background: #ccc;
+  background: var(--puter-scrollbar-thumb);
   border-radius: 4px;
 }
 
 .puter-messages::-webkit-scrollbar-thumb:hover,
 .puter-page-result::-webkit-scrollbar-thumb:hover,
 .puter-selection-result::-webkit-scrollbar-thumb:hover {
-  background: #999;
+  background: var(--puter-scrollbar-thumb-hover);
 }
